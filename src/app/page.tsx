@@ -1,13 +1,4 @@
 import UploadImage from "./upload-image";
-import { NextApiRequest, NextApiResponse } from "next";
-
-export function handler(request: NextApiRequest, response: NextApiResponse) {
-  response.status(200).json({
-    body: request.body,
-    query: request.query,
-    cookies: request.cookies,
-  });
-}
 
 export default function Home() {
   return (
