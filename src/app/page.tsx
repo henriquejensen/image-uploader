@@ -11,12 +11,22 @@ export function handler(request: NextApiRequest, response: NextApiResponse) {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1 className="text-6xl font-bold text-center">Upload your image</h1>
-      <p className="text-center text-gray-500">
-        File should be Jpeg, Jpg, Png or Svg
-      </p>
-      <UploadImage />
-    </main>
+    <>
+      <div className="flex flex-col min-h-screen justify-center items-center">
+        <main className="flex flex-col items-center shadow-2xl p-5">
+          <h1 className="font-bold text-center text-lg">Upload your image</h1>
+          <p className="text-center text-gray-500 text-sm mb-9 mt-3">
+            File should be Jpeg, Jpg, Png or Svg
+          </p>
+          <UploadImage />
+        </main>
+      </div>
+      <footer className="flex justify-center items-end w-full h-24 p-3 absolute bottom-0">
+        created by{"\u00A0"}
+        <a href="https://github.com/henriquejensen" target="_blank">
+          <b>Henrique Jensen</b>
+        </a>
+      </footer>
+    </>
   );
 }
