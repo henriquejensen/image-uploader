@@ -1,38 +1,18 @@
 "use client";
 
+import FileUploadButton from "@/components/file-upload-button";
+import DragAndDrop from "@/components/drag-and-drop";
 import Image from "next/image";
 import React, { useState } from "react";
-
-const defaultImage = "/default.svg";
-
-const upLoadImage = async (
-  file: File | undefined,
-  callBack: (file: string) => void
-) => {
-  if (!file) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("image", file);
-
-  const response = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-
-  const { url } = await response.json();
-
-  callBack(url);
-};
+import { postImage } from "@/services/post-image";
 
 export default function UploadImage() {
-  const [selectedImage, setSelectedImage] = useState(defaultImage);
+  const [selectedImage, setSelectedImage] = useState("");
 
   const handleImageUpload = React.useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      upLoadImage(file, setSelectedImage);
+      postImage(file, setSelectedImage);
     },
     []
   );
@@ -44,7 +24,7 @@ export default function UploadImage() {
   const handleDrop = React.useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    upLoadImage(file, setSelectedImage);
+    postImage(file, setSelectedImage);
   }, []);
 
   return (
@@ -54,40 +34,14 @@ export default function UploadImage() {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        {selectedImage === defaultImage ? (
-          <>
-            <Image
-              src={selectedImage}
-              fill
-              alt="Drag and drop your image here"
-              priority
-              className="p-7"
-            />
-            <span className="absolute bottom-1 right-0 left-0">
-              <span className="text-sm text-slate-500">
-                Drag and drop your image here
-              </span>
-            </span>
-          </>
-        ) : (
+        {selectedImage ? (
           <Image src={selectedImage} fill alt="Image uploaded" priority />
+        ) : (
+          <DragAndDrop />
         )}
       </div>
       <span className="text-sm text-slate-500 my-8">Or</span>
-      <label className="block">
-        <span className="sr-only">Choose profile photo</span>
-        <input
-          type="file"
-          onChange={handleImageUpload}
-          className="block w-full text-sm text-slate-500
-      file:mr-4 file:py-2 file:px-4
-      file:rounded-full file:border-0
-      file:text-sm file:font-semibold
-      file:bg-blue-500 file:text-white
-      hover:file:bg-blue-400
-      file:cursor-pointer"
-        />
-      </label>
+      <FileUploadButton handleImageUpload={handleImageUpload} />
     </div>
   );
 }
