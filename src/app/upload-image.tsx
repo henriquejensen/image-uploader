@@ -5,37 +5,47 @@ import DragAndDrop from "@/components/drag-and-drop";
 import Image from "next/image";
 import React, { useState } from "react";
 import { postImage } from "@/services/post-image";
-import { getWholeUrl } from "@/utils";
 import Swal from "sweetalert2";
 
 export default function UploadImage() {
   const [selectedImage, setSelectedImage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handlePostImage = React.useCallback(async (file: File | undefined) => {
+    try {
+      setLoading(true);
+      await postImage(file, setSelectedImage);
+    } catch (error) {
+      Swal.fire("Error uploading image, image size must be less than 1MB");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const handleImageUpload = React.useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      setLoading(true);
-      await postImage(file, setSelectedImage);
-      setLoading(false);
+      handlePostImage(file);
     },
-    []
+    [handlePostImage]
   );
 
   const handleDragOver = React.useCallback((e: React.DragEvent) => {
     e.preventDefault();
   }, []);
 
-  const handleDrop = React.useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    setLoading(true);
-    await postImage(file, setSelectedImage);
-    setLoading(false);
-  }, []);
+  const handleDrop = React.useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files?.[0];
+
+      handlePostImage(file);
+    },
+    [handlePostImage]
+  );
 
   const handleCopy = React.useCallback(() => {
-    navigator.clipboard.writeText(getWholeUrl(selectedImage));
+    navigator.clipboard.writeText(selectedImage);
 
     Swal.fire("Copied!", "Image URL copied to clipboard", "success");
   }, [selectedImage]);
@@ -61,7 +71,7 @@ export default function UploadImage() {
         <div className="relative text-xs">
           <input
             type="text"
-            value={getWholeUrl(selectedImage)}
+            value={selectedImage}
             readOnly
             className="w-72 md:w-80 border-1 border-solid bg-slate-100 rounded-lg p-3"
           />

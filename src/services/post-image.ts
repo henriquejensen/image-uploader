@@ -10,12 +10,17 @@ export const postImage = async (
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-  const { url } = await response.json();
+    const { url } = await response.json();
 
-  callBack(url);
+    callBack(url);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error uploading file");
+  }
 };
