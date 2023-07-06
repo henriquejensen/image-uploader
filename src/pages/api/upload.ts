@@ -38,7 +38,7 @@ const storageDevelopment = multer.diskStorage({
 
 // Configure Multer
 const upload = multer({
-  storage: process.env.NODE_ENV === "production" ? storageProduction : storageDevelopment,
+  storage: process.env.AWS_BUCKET_NAME ? storageProduction : storageDevelopment,
   limits: { fileSize: 1024 * 1024 * 2 }, // 2 MB
   fileFilter: (_, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".svg"];
@@ -67,10 +67,10 @@ const uploadHandler = (request: Request, res: Response) => {
         return res.status(500).json({ error: err.message });
       }
 
-      let url = `${request.file.location}`;
+      let url = `http://localhost:3000/uploads/${request.file.filename}`;
 
-      if (process.env.NODE_ENV === "development") {
-        url = `http://localhost:3000/uploads/${request.file.filename}`;
+      if (process.env.AWS_BUCKET_NAME) {
+        url = `${request.file.location}`;
       }
 
       return res
