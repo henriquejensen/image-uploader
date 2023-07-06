@@ -1,5 +1,7 @@
 # Image uploader
 
+[Layout](https://www.figma.com/file/NxbZm3CAovYh89dFXe7EOw/Image-Uploader?node-id=0%3A1&mode=dev)
+
 ## Description
 
 This is a simple image uploader that allows you to upload images to a server. It uses the [Multer](https://www.npmjs.com/package/multer) package to handle the file upload. The uploaded images are stored in an AWS S3 bucket.
