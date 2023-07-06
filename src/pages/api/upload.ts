@@ -27,18 +27,18 @@ const storageProduction = multers3({
   },
 });
 
-const storageDevelopment = multer.diskStorage({
-  destination: "./public/uploads/", // Set the destination folder for uploaded files
-  filename: (req: any, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const fileExtension = extname(file.originalname);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
-  }
-})
+// const storageDevelopment = multer.diskStorage({
+//   destination: "./public/uploads/", // Set the destination folder for uploaded files
+//   filename: (req: any, file, cb) => {
+//     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+//     const fileExtension = extname(file.originalname);
+//     cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
+//   }
+// })
 
 // Configure Multer
 const upload = multer({
-  storage: process.env.NODE_ENV === 'development' ? storageDevelopment : storageProduction,
+  storage: storageProduction,
   limits: { fileSize: 1024 * 1024 * 2 }, // 2 MB
   fileFilter: (_, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".svg"];
@@ -69,9 +69,9 @@ const uploadHandler = (request: Request, res: Response) => {
 
       let url = `${request.file.location}`;
 
-      if (process.env.NODE_ENV === "development") {
-        url = `http://localhost:3000/uploads/${request.file.filename}`;
-      }
+      // if (process.env.NODE_ENV === "development") {
+      //   url = `http://localhost:3000/uploads/${request.file.filename}`;
+      // }
 
       return res
         .status(200)

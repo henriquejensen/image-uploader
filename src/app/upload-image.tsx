@@ -16,7 +16,7 @@ export default function UploadImage() {
       setLoading(true);
       await postImage(file, setSelectedImage);
     } catch (error) {
-      Swal.fire("Error uploading image, image size must be less than 1MB");
+      Swal.fire("Error uploading image, image size must be less than 2MB");
     } finally {
       setLoading(false);
     }
