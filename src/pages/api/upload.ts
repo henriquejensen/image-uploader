@@ -75,7 +75,7 @@ const uploadHandler = (request: Request, res: Response) => {
 
       return res
         .status(200)
-        .json({ message: "File uploaded successfully", url, env: process.env });
+        .json({ message: "File uploaded successfully", url });
     });
   } catch (error) {
     console.error(error);
