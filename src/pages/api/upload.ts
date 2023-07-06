@@ -15,7 +15,7 @@ declare module "express" {
 
 const client = new S3({ region: process.env.AWS_REGION });
 
-const storageProduction = multers3({
+const storageProduction = () => multers3({
   s3: client,
   bucket: process.env.AWS_BUCKET_NAME as string,
   acl: "public-read",
@@ -27,18 +27,18 @@ const storageProduction = multers3({
   },
 });
 
-// const storageDevelopment = multer.diskStorage({
-//   destination: "./public/uploads/", // Set the destination folder for uploaded files
-//   filename: (req: any, file, cb) => {
-//     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-//     const fileExtension = extname(file.originalname);
-//     cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
-//   }
-// })
+const storageDevelopment = () => multer.diskStorage({
+  destination: "./public/uploads/", // Set the destination folder for uploaded files
+  filename: (req: any, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const fileExtension = extname(file.originalname);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
+  }
+})
 
 // Configure Multer
 const upload = multer({
-  storage: storageProduction,
+  storage: process.env.NODE_ENV === "production" ? storageProduction() : storageDevelopment(),
   limits: { fileSize: 1024 * 1024 * 2 }, // 2 MB
   fileFilter: (_, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".svg"];
@@ -67,12 +67,11 @@ const uploadHandler = (request: Request, res: Response) => {
         return res.status(500).json({ error: err.message });
       }
 
-      // let url = `http://localhost:3000/uploads/${request.file.filename}`;
-      let url = `${request.file.location}`;
+      let url = `http://localhost:3000/uploads/${request.file.filename}`
 
-      // if (process.env.AWS_BUCKET_NAME) {
-      //   url = `${request.file.location}`;
-      // }
+      if (process.env.NODE_ENV === "production") {
+        url = request.file.location;
+      }
 
       return res
         .status(200)
