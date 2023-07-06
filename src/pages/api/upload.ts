@@ -15,7 +15,7 @@ declare module "express" {
 
 const client = new S3({ region: process.env.AWS_REGION });
 
-const storage = multers3({
+const storageProduction = multers3({
   s3: client,
   bucket: process.env.AWS_BUCKET_NAME as string,
   acl: "public-read",
@@ -27,9 +27,18 @@ const storage = multers3({
   },
 });
 
+const storageDevelopment = multer.diskStorage({
+  destination: "./public/uploads/", // Set the destination folder for uploaded files
+  filename: (req: any, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const fileExtension = extname(file.originalname);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
+  }
+})
+
 // Configure Multer
 const upload = multer({
-  storage,
+  storage: process.env.NODE_ENV === 'development' ? storageDevelopment : storageProduction,
   limits: { fileSize: 1024 * 1024 * 2 }, // 2 MB
   fileFilter: (_, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".svg"];
@@ -42,15 +51,6 @@ const upload = multer({
     }
   },
 });
-
-// const storage = multer.diskStorage({
-//   destination: "./public/uploads/", // Set the destination folder for uploaded files
-//   filename: (req: any, file, cb) => {
-//     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-//     const fileExtension = extname(file.originalname);
-//     cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
-//   }
-// })
 
 // Define the API route handler
 export const config = {
@@ -67,9 +67,12 @@ const uploadHandler = (request: Request, res: Response) => {
         return res.status(500).json({ error: err.message });
       }
 
-      console.log("Uploaded successfully");
+      let url = `${request.file.location}`;
 
-      const url = `${request.file.location}`;
+      if (process.env.NODE_ENV === "development") {
+        url = `http://localhost:3000/uploads/${request.file.filename}`;
+      }
+
       return res
         .status(200)
         .json({ message: "File uploaded successfully", url });
